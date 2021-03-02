@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="header">
+      <UniqueIdentifier>{1825a3ec-837c-4c83-bffa-97391f393ad7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{1cde073e-ab84-486b-949a-23567dd79699}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Action.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Actor.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ActorManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\AssetManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Game.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\misc.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ScreenAbstract.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ScreenBattle.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Tilemap.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Tileset.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Ability.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Action.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Actor.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ActorManager.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\AssetManager.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Game.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\misc.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ScreenAbstract.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ScreenBattle.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Tilemap.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Tileset.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Ability.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
