@@ -2,6 +2,7 @@
 
 #include <SFML/System.hpp>
 #include <vector>
+#include <functional>
 
 namespace arena {
 	namespace misc {
@@ -17,5 +18,10 @@ namespace arena {
 		unsigned long generateId();
 
 		int getRandomIntInRange(int min, int max);
+
+		float getTileDistance(int tile_x0, int tile_y0, int tile_x1, int tile_y1);
+		int getTileDistanceManhattan(int tile_x0, int tile_y0, int tile_x1, int tile_y1);
+
+		bool bresenham(int x1, int y1, int x2, int y2, std::function<bool(int x, int y)> callback);
 	}
 }

@@ -27,6 +27,7 @@
     <ClCompile Include="..\src\Game.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\misc.cpp" />
+    <ClCompile Include="..\src\ProgressBar.cpp" />
     <ClCompile Include="..\src\ScreenAbstract.cpp" />
     <ClCompile Include="..\src\ScreenBattle.cpp" />
     <ClCompile Include="..\src\Tilemap.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="..\src\AssetManager.hpp" />
     <ClInclude Include="..\src\Game.hpp" />
     <ClInclude Include="..\src\misc.hpp" />
+    <ClInclude Include="..\src\ProgressBar.hpp" />
     <ClInclude Include="..\src\ScreenAbstract.hpp" />
     <ClInclude Include="..\src\ScreenBattle.hpp" />
     <ClInclude Include="..\src\Tilemap.hpp" />

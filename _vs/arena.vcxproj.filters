@@ -45,6 +45,9 @@
     <ClCompile Include="..\src\Ability.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ProgressBar.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp">
@@ -78,6 +81,9 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Ability.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProgressBar.hpp">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>

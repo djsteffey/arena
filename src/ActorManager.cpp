@@ -3,12 +3,13 @@
 #include "Actor.hpp"
 #include "AssetManager.hpp"
 #include "misc.hpp"
+#include "Action.hpp"
 
 namespace arena {
 	ActorManager::ActorManager() {
 		this->m_asset_manager = nullptr;
 		this->m_tileset = nullptr;
-		this->m_actor_with_turn = nullptr;
+		this->m_turn_action = nullptr;
 	}
 
 	ActorManager::~ActorManager() {
@@ -27,7 +28,7 @@ namespace arena {
 		}
 
 		// turn
-		this->m_actor_with_turn = nullptr;
+		this->m_turn_action = nullptr;
 
 		// done
 		return true;
@@ -35,30 +36,30 @@ namespace arena {
 
 	void ActorManager::update(int ms, Tilemap* tilemap) {
 		// update the actors
-		for (auto& kvp : this->m_actors) {
-			kvp.second->update(ms, tilemap, this);
+		for (auto& actor : this->m_actors) {
+			actor->update(ms, tilemap, this);
 		}
 
-		// check actor with turn
-		if (this->m_actor_with_turn == nullptr) {
-			this->m_actor_with_turn = this->getActorWithTurn();
-			this->m_actor_with_turn->ai(tilemap, this);
+		// check turn
+		if (this->m_turn_action == nullptr) {
+			Actor* actor = this->getActorWithTurn();
+			this->m_turn_action = actor->ai(tilemap, this);
 		}
-		else {
-			if (this->m_actor_with_turn->getIsPerformingTurn() == false) {
-				this->m_actor_with_turn = nullptr;
+		if (this->m_turn_action != nullptr) {
+			if (this->m_turn_action->update(ms)) {
+				this->m_turn_action = nullptr;
 			}
 		}
 	}
 
 	void ActorManager::draw(sf::RenderTarget* rt) {
-		for (auto& kvp : this->m_actors) {
-			kvp.second->draw(rt);
+		for (auto& actor : this->m_actors) {
+			actor->draw(rt);
 		}
 	}
 
 	void ActorManager::addActor(std::unique_ptr<Actor> actor) {
-		this->m_actors[actor->getId()] = std::move(actor);
+		this->m_actors.push_back(std::move(actor));
 	}
 
 	Tileset* ActorManager::getTileset() {
@@ -69,11 +70,10 @@ namespace arena {
 		// find highest >= 1000 initiative
 		while (true) {
 			Actor* turn = nullptr;
-			for (auto& kvp : this->m_actors) {
-				Actor* actor = kvp.second.get();
-				if (actor->getStats()->initiative >= 1000) {
+			for (auto& actor : this->m_actors) {
+				if (actor->getIsAlive() && actor->getStats()->initiative >= 1000) {
 					if (turn == nullptr || actor->getStats()->initiative > turn->getStats()->initiative) {
-						turn = actor;
+						turn = actor.get();
 					}
 				}
 			}
@@ -81,8 +81,7 @@ namespace arena {
 			// check if we got one
 			if (turn == nullptr) {
 				// no one so update initiative
-				for (auto& kvp : this->m_actors) {
-					Actor* actor = kvp.second.get();
+				for (auto& actor : this->m_actors) {
 					actor->getStats()->initiative += actor->getStats()->speed;
 				}
 			}
@@ -94,12 +93,19 @@ namespace arena {
 	}
 
 	Actor* ActorManager::getActorAtTilePosition(int tile_x, int tile_y) {
-		for (auto& kvp : this->m_actors) {
-			Actor* actor = kvp.second.get();
+		for (auto& actor : this->m_actors) {
 			if (actor->getTilePositionX() == tile_x && actor->getTilePositionY() == tile_y) {
-				return actor;
+				return actor.get();
 			}
 		}
 		return nullptr;
+	}
+
+	int ActorManager::getActorCount() {
+		return this->m_actors.size();
+	}
+
+	Actor* ActorManager::getActorAtIndex(int index) {
+		return this->m_actors[index].get();
 	}
 }

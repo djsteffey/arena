@@ -2,6 +2,7 @@
 
 #include <SFML/System.hpp>
 #include <list>
+#include <functional>
 
 namespace arena {
 	class Actor;
@@ -14,7 +15,21 @@ namespace arena {
 
 	protected:
 
+
 	private:
+
+	};
+
+	class ActionCustom : public Action {
+	public:
+		ActionCustom(std::function<bool(int)> update_function);
+		~ActionCustom();
+		bool update(int ms) override;
+
+	protected:
+
+	private:
+		std::function<bool(int)> m_update_function;
 	};
 
 	class ActionSequence : public Action {
@@ -32,7 +47,7 @@ namespace arena {
 
 	class ActionMoveTo : public Action {
 	public:
-		ActionMoveTo(Actor* actor, int duration, sf::Vector2f end);
+		ActionMoveTo(Actor* actor, int duration, sf::Vector2f start, sf::Vector2f end);
 		~ActionMoveTo();
 		bool update(int ms) override;
 
@@ -48,7 +63,7 @@ namespace arena {
 
 	class ActionMoveBy : public ActionMoveTo {
 	public:
-		ActionMoveBy(Actor* actor, int duration, sf::Vector2f amount);
+		ActionMoveBy(Actor* actor, int duration, sf::Vector2f start, sf::Vector2f amount);
 		~ActionMoveBy();
 
 	protected:
@@ -56,17 +71,13 @@ namespace arena {
 	private:
 	};
 
-	class ActionMeleeAttack : public Action {
+	class ActionMeleeAttack : public ActionSequence {
 	public:
-		ActionMeleeAttack(Actor* actor, Actor* target, int duration, int tilesize);
+		ActionMeleeAttack(Actor* actor, Actor* target, int duration);
 		~ActionMeleeAttack();
-		bool update(int ms) override;
 
 	protected:
 
 	private:
-		Actor* m_actor;
-		Actor* m_target;
-		ActionSequence m_sequence;
 	};
 }

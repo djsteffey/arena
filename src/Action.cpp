@@ -10,8 +10,18 @@ namespace arena {
 
 	}
 
-	bool Action::update(int ms) {
-		return true;
+	//////////////////////////////////////////////////////////////////////////////
+
+	ActionCustom::ActionCustom(std::function<bool(int)> update_function) {
+		this->m_update_function = update_function;
+	}
+
+	ActionCustom::~ActionCustom() {
+
+	}
+
+	bool ActionCustom::update(int ms) {
+		return this->m_update_function(ms);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -47,11 +57,11 @@ namespace arena {
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	ActionMoveTo::ActionMoveTo(Actor* actor, int duration, sf::Vector2f end) {
+	ActionMoveTo::ActionMoveTo(Actor* actor, int duration, sf::Vector2f start, sf::Vector2f end) {
 		this->m_duration = duration;
 		this->m_current_duration = 0;
 		this->m_actor = actor;
-		this->m_start_position = actor->getWorldPosition();
+		this->m_start_position = start;
 		this->m_end_position = end;
 	}
 
@@ -76,7 +86,7 @@ namespace arena {
 
 	//////////////////////////////////////////////////////////////////////////////
 	
-	ActionMoveBy::ActionMoveBy(Actor* actor, int duration, sf::Vector2f amount) : ActionMoveTo(actor, duration, actor->getWorldPosition() + amount) {
+	ActionMoveBy::ActionMoveBy(Actor* actor, int duration, sf::Vector2f start, sf::Vector2f amount) : ActionMoveTo(actor, duration, start, actor->getWorldPosition() + amount) {
 
 	}
 
@@ -86,39 +96,62 @@ namespace arena {
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	ActionMeleeAttack::ActionMeleeAttack(Actor* actor, Actor* target, int duration, int tilesize) {
-		// save the actors
-		this->m_actor = actor;
-		this->m_target = target;
-
+	ActionMeleeAttack::ActionMeleeAttack(Actor* actor, Actor* target, int duration) {
 		// compute start and end
-		sf::Vector2f start = sf::Vector2f(static_cast<float>(this->m_actor->getTilePositionX() * tilesize), static_cast<float>(this->m_actor->getTilePositionY() * tilesize));
-		sf::Vector2f end = sf::Vector2f(static_cast<float>(this->m_target->getTilePositionX() * tilesize), static_cast<float>(this->m_target->getTilePositionY() * tilesize));
+		sf::Vector2f start = actor->getWorldPosition();
+		sf::Vector2f end = target->getWorldPosition();
 		end = (end - start) / 2.0f + start;
 
-		// setup sequence
-		auto ptr = std::make_unique<ActionMoveTo>(
+		// face direction
+		std::unique_ptr<Action> ptr = std::make_unique<ActionCustom>(
+			[actor, target](int ms) -> bool {
+				// face appropriate direction
+				if (target->getTilePositionX() > actor->getTilePositionX()) {
+					actor->faceDirection(misc::EDirection::RIGHT);
+				}
+				else if (target->getTilePositionX() < actor->getTilePositionX()) {
+					actor->faceDirection(misc::EDirection::LEFT);
+				}
+
+				// done
+				return true;
+			}
+		);
+		this->addAction(std::move(ptr));
+
+		// bump towards
+		ptr = std::make_unique<ActionMoveTo>(
 			actor,
 			duration / 2,
 			start,
 			end
 		);
-		this->m_sequence.addAction(std::move(ptr));
+		this->addAction(std::move(ptr));
 
+		// damage
+		ptr = std::make_unique<ActionCustom>(
+			[actor, target](int ms) -> bool{
+				// calculate damage
+				int damage = 2;
+				target->onDamage(2);
+
+				// done
+				return true;
+			}
+		);
+		this->addAction(std::move(ptr));
+
+		// bump away
 		ptr = std::make_unique<ActionMoveTo>(
 			actor,
 			duration / 2,
 			end,
 			start
 		);
-		this->m_sequence.addAction(std::move(ptr));
+		this->addAction(std::move(ptr));
 	}
 
 	ActionMeleeAttack::~ActionMeleeAttack() {
 
-	}
-
-	bool ActionMeleeAttack::update(int ms) {
-		return this->m_sequence.update(ms);
 	}
 }

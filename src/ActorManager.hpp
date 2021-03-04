@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <map>
+#include <vector>
 #include <memory>
 
 namespace arena {
@@ -9,6 +9,7 @@ namespace arena {
 	class Tilemap;
 	class Actor;
 	class Tileset;
+	class Action;
 
 	class ActorManager {
 	public:
@@ -21,6 +22,8 @@ namespace arena {
 		void addActor(std::unique_ptr<Actor> actor);
 		Tileset* getTileset();
 		Actor* getActorAtTilePosition(int tile_x, int tile_y);
+		int getActorCount();
+		Actor* getActorAtIndex(int index);
 
 	protected:
 
@@ -29,7 +32,7 @@ namespace arena {
 
 		AssetManager* m_asset_manager;
 		Tileset* m_tileset;
-		std::map<unsigned long, std::unique_ptr<Actor>> m_actors;
-		Actor* m_actor_with_turn;
+		std::vector<std::unique_ptr<Actor>> m_actors;
+		std::unique_ptr<Action> m_turn_action;
 	};
 }

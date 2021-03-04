@@ -55,7 +55,7 @@ namespace arena {
 		}
 		for (int i = 0; i < 5; ++i) {
 			std::unique_ptr<Actor> actor = std::make_unique<Actor>();
-			if (actor->init(44, 48, this->m_actor_manager->getTileset()) == false) {
+			if (actor->init(this->m_asset_manager.get(), 44, 48, this->m_actor_manager->getTileset()) == false) {
 				misc::log("ScreenBattle::init()", "error creating Actor");
 				return false;
 			}
