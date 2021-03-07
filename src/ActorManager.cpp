@@ -43,7 +43,7 @@ namespace arena {
 		// check turn
 		if (this->m_turn_action == nullptr) {
 			Actor* actor = this->getActorWithTurn();
-			this->m_turn_action = actor->ai(tilemap, this);
+			this->m_turn_action = actor->ai(this->m_asset_manager, tilemap, this);
 		}
 		if (this->m_turn_action != nullptr) {
 			if (this->m_turn_action->update(ms)) {
@@ -55,6 +55,9 @@ namespace arena {
 	void ActorManager::draw(sf::RenderTarget* rt) {
 		for (auto& actor : this->m_actors) {
 			actor->draw(rt);
+		}
+		if (this->m_turn_action != nullptr) {
+			this->m_turn_action->draw(rt);
 		}
 	}
 

@@ -7,6 +7,7 @@ namespace arena {
 	class AssetManager;
 	class Tilemap;
 	class ActorManager;
+	class UiManager;
 
 	class ScreenBattle: public ScreenAbstract{
 	public:
@@ -23,6 +24,8 @@ namespace arena {
 		std::unique_ptr<AssetManager> m_asset_manager;
 		std::unique_ptr<Tilemap> m_tilemap;
 		std::unique_ptr<ActorManager> m_actor_manager;
+		std::unique_ptr<UiManager> m_ui_manager;
 		sf::View m_view;
+		sf::View m_ui_view;
 	};
 }

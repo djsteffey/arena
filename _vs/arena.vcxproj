@@ -24,14 +24,16 @@
     <ClCompile Include="..\src\Actor.cpp" />
     <ClCompile Include="..\src\ActorManager.cpp" />
     <ClCompile Include="..\src\AssetManager.cpp" />
+    <ClCompile Include="..\src\Effect.cpp" />
     <ClCompile Include="..\src\Game.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\misc.cpp" />
-    <ClCompile Include="..\src\ProgressBar.cpp" />
     <ClCompile Include="..\src\ScreenAbstract.cpp" />
     <ClCompile Include="..\src\ScreenBattle.cpp" />
     <ClCompile Include="..\src\Tilemap.cpp" />
     <ClCompile Include="..\src\Tileset.cpp" />
+    <ClCompile Include="..\src\UiManager.cpp" />
+    <ClCompile Include="..\src\UiWidget.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Ability.hpp" />
@@ -39,13 +41,15 @@
     <ClInclude Include="..\src\Actor.hpp" />
     <ClInclude Include="..\src\ActorManager.hpp" />
     <ClInclude Include="..\src\AssetManager.hpp" />
+    <ClInclude Include="..\src\Effect.hpp" />
     <ClInclude Include="..\src\Game.hpp" />
     <ClInclude Include="..\src\misc.hpp" />
-    <ClInclude Include="..\src\ProgressBar.hpp" />
     <ClInclude Include="..\src\ScreenAbstract.hpp" />
     <ClInclude Include="..\src\ScreenBattle.hpp" />
     <ClInclude Include="..\src\Tilemap.hpp" />
     <ClInclude Include="..\src\Tileset.hpp" />
+    <ClInclude Include="..\src\UiManager.hpp" />
+    <ClInclude Include="..\src\UiWidget.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

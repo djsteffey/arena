@@ -44,7 +44,7 @@ namespace arena {
 		float getTileDistance(int tile_x0, int tile_y0, int tile_x1, int tile_y1) {
 			int dx = tile_x1 - tile_x0;
 			int dy = tile_y1 - tile_y0;
-			return std::sqrt(dx * dx + dy * dy);
+			return static_cast<float>(std::sqrt(dx * dx + dy * dy));
 		}
 
 		int getTileDistanceManhattan(int tile_x0, int tile_y0, int tile_x1, int tile_y1) {
@@ -53,30 +53,73 @@ namespace arena {
 			return std::abs(dx) + std::abs(dy);
 		}
 
-		bool bresenham(int x1, int y1, int x2, int y2, std::function<bool(int x, int y)> callback) {
-			int m_new = 2 * (y2 - y1);
-			int slope_error_new = m_new - (x2 - x1);
-			for (int x = x1, y = y1; x <= x2; x++)
+		// http://www.roguebasin.com/index.php?title=Bresenham%27s_Line_Algorithm
+		bool bresenham(int x1, int y1, int const x2, int const y2, std::function<bool(int x, int y)> callback) {
+			int delta_x(x2 - x1);
+			// if x1 == x2, then it does not matter what we set here
+			signed char const ix((delta_x > 0) - (delta_x < 0));
+			delta_x = std::abs(delta_x) << 1;
+
+			int delta_y(y2 - y1);
+			// if y1 == y2, then it does not matter what we set here
+			signed char const iy((delta_y > 0) - (delta_y < 0));
+			delta_y = std::abs(delta_y) << 1;
+
+			if (callback(x1, y1) == false) {
+				// dont want to play anymore
+				return false;
+			}
+
+			if (delta_x >= delta_y)
 			{
-				// callback on this point
-				if (callback(x, y) == false) {
-					// dont want to continue
-					return false;
-				}
+				// error may go below zero
+				int error(delta_y - (delta_x >> 1));
 
-				// Add slope to increment angle formed 
-				slope_error_new += m_new;
-
-				// Slope error reached limit, time to 
-				// increment y and update slope error. 
-				if (slope_error_new >= 0)
+				while (x1 != x2)
 				{
-					y++;
-					slope_error_new -= 2 * (x2 - x1);
+					// reduce error, while taking into account the corner case of error == 0
+					if ((error > 0) || (!error && (ix > 0)))
+					{
+						error -= delta_x;
+						y1 += iy;
+					}
+					// else do nothing
+
+					error += delta_y;
+					x1 += ix;
+
+					if (callback(x1, y1) == false) {
+						// dont want to play anymore
+						return false;
+					}
+				}
+			}
+			else
+			{
+				// error may go below zero
+				int error(delta_x - (delta_y >> 1));
+
+				while (y1 != y2)
+				{
+					// reduce error, while taking into account the corner case of error == 0
+					if ((error > 0) || (!error && (iy > 0)))
+					{
+						error -= delta_y;
+						x1 += ix;
+					}
+					// else do nothing
+
+					error += delta_x;
+					y1 += iy;
+
+					if (callback(x1, y1) == false) {
+						// dont want to play anymore
+						return false;
+					}
 				}
 			}
 
-			// complete
+			// finished
 			return true;
 		}
 	}

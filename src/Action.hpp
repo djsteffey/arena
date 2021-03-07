@@ -1,17 +1,22 @@
 #pragma once
 
 #include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
 #include <list>
 #include <functional>
+#include <memory>
 
 namespace arena {
 	class Actor;
+	class AssetManager;
+	class Effect;
 
 	class Action {
 	public:
 		Action();
 		virtual ~Action();
 		virtual bool update(int ms) = 0;
+		virtual void draw(sf::RenderTarget* rt);
 
 	protected:
 
@@ -37,6 +42,7 @@ namespace arena {
 		ActionSequence();
 		~ActionSequence();
 		bool update(int ms) override;
+		void draw(sf::RenderTarget* rt) override;
 		void addAction(std::unique_ptr<Action> action);
 
 	protected:
@@ -75,9 +81,46 @@ namespace arena {
 	public:
 		ActionMeleeAttack(Actor* actor, Actor* target, int duration);
 		~ActionMeleeAttack();
+		
+	protected:
+
+	private:
+	};
+
+	class ActionProjectileAttack : public ActionSequence {
+	public:
+		ActionProjectileAttack(AssetManager* am, Actor* actor, Actor* target, int duration);
+		~ActionProjectileAttack();
 
 	protected:
 
 	private:
+
+	};
+
+	class ActionDelay : public Action {
+	public:
+		ActionDelay(int ms);
+		~ActionDelay();
+		bool update(int ms) override;
+
+	protected:
+
+	private:
+		int m_duration;
+		int m_duration_current;
+	};
+
+	class ActionEffect : public Action {
+	public:
+		ActionEffect(std::unique_ptr<Effect> effect);
+		~ActionEffect();
+		bool update(int ms) override;
+		void draw(sf::RenderTarget* rt) override;
+
+	protected:
+
+	private:
+		std::unique_ptr<Effect> m_effect;
 	};
 }

@@ -1,5 +1,7 @@
 #include "Action.hpp"
 #include "Actor.hpp"
+#include "AssetManager.hpp"
+#include "Effect.hpp"
 
 namespace arena {
 	Action::Action() {
@@ -7,6 +9,10 @@ namespace arena {
 	}
 
 	Action::~Action() {
+
+	}
+
+	void Action::draw(sf::RenderTarget* rt) {
 
 	}
 
@@ -24,7 +30,7 @@ namespace arena {
 		return this->m_update_function(ms);
 	}
 
-	//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 	ActionSequence::ActionSequence() {
 		
@@ -49,6 +55,10 @@ namespace arena {
 
 		// not done yet
 		return false;
+	}
+
+	void ActionSequence::draw(sf::RenderTarget* rt) {
+		this->m_actions.front()->draw(rt);
 	}
 
 	void ActionSequence::addAction(std::unique_ptr<Action> action) {
@@ -102,25 +112,8 @@ namespace arena {
 		sf::Vector2f end = target->getWorldPosition();
 		end = (end - start) / 2.0f + start;
 
-		// face direction
-		std::unique_ptr<Action> ptr = std::make_unique<ActionCustom>(
-			[actor, target](int ms) -> bool {
-				// face appropriate direction
-				if (target->getTilePositionX() > actor->getTilePositionX()) {
-					actor->faceDirection(misc::EDirection::RIGHT);
-				}
-				else if (target->getTilePositionX() < actor->getTilePositionX()) {
-					actor->faceDirection(misc::EDirection::LEFT);
-				}
-
-				// done
-				return true;
-			}
-		);
-		this->addAction(std::move(ptr));
-
 		// bump towards
-		ptr = std::make_unique<ActionMoveTo>(
+		std::unique_ptr<Action> ptr = std::make_unique<ActionMoveTo>(
 			actor,
 			duration / 2,
 			start,
@@ -130,7 +123,7 @@ namespace arena {
 
 		// damage
 		ptr = std::make_unique<ActionCustom>(
-			[actor, target](int ms) -> bool{
+			[actor, target](int ms) -> bool {
 				// calculate damage
 				int damage = 2;
 				target->onDamage(2);
@@ -147,11 +140,90 @@ namespace arena {
 			duration / 2,
 			end,
 			start
-		);
+			);
 		this->addAction(std::move(ptr));
 	}
 
 	ActionMeleeAttack::~ActionMeleeAttack() {
 
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	ActionProjectileAttack::ActionProjectileAttack(AssetManager* am, Actor* actor, Actor* target, int duration) {
+		// compute start and end
+		sf::Vector2f start = actor->getWorldPositionCenter();
+		sf::Vector2f end = target->getWorldPositionCenter();
+
+		// create a projectile
+		std::unique_ptr<Effect> effect = std::make_unique<EffectProjectile>(
+			start.x,
+			start.y,
+			end.x,
+			end.y,
+			duration
+		);
+
+		// add as an action
+		std::unique_ptr<Action> ptr = std::make_unique<ActionEffect>(std::move(effect));
+		this->addAction(std::move(ptr));
+
+		// damage
+		auto damage = std::make_unique<ActionCustom>(
+			[actor, target](int ms) -> bool {
+				// calculate damage
+				int damage = 1;
+				target->onDamage(1);
+
+				// done
+				return true;
+			}
+		);
+		this->addAction(std::move(damage));
+	}
+
+	ActionProjectileAttack::~ActionProjectileAttack() {
+
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	ActionDelay::ActionDelay(int ms) {
+		this->m_duration = ms;
+		this->m_duration_current = 0;
+	}
+
+	ActionDelay::~ActionDelay() {
+
+	}
+
+	bool ActionDelay::update(int ms) {
+		this->m_duration_current += ms;
+		if (this->m_duration_current > this->m_duration) {
+			this->m_duration_current = this->m_duration;
+		}
+		if (this->m_duration_current == this->m_duration) {
+			return true;
+		}
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	ActionEffect::ActionEffect(std::unique_ptr<Effect> effect) {
+		this->m_effect = std::move(effect);
+	}
+
+	ActionEffect::~ActionEffect() {
+
+	}
+
+	bool ActionEffect::update(int ms) {
+		return this->m_effect->update(ms);
+	}
+
+	void ActionEffect::draw(sf::RenderTarget* rt) {
+		this->m_effect->draw(rt);
 	}
 }

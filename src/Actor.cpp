@@ -5,7 +5,7 @@
 #include "Tilemap.hpp"
 #include "ActorManager.hpp"
 #include "Ability.hpp"
-#include "ProgressBar.hpp"
+#include "UiWidget.hpp"
 
 namespace arena {
 	Actor::Actor() {
@@ -49,14 +49,22 @@ namespace arena {
 		// setup the stats
 		this->m_stats.speed = rand() % 2 + 2;
 		this->m_stats.initiative = 0;
-		this->m_stats.hp_max = misc::getRandomIntInRange(10, 20);
-		this->m_stats.hp_current = misc::getRandomIntInRange(5, 10);
+		this->m_stats.hp_max = misc::getRandomIntInRange(10, 10);
+		this->m_stats.hp_current = misc::getRandomIntInRange(10, 10);
 
 		// abilities
 		this->m_abilities.push_back(std::make_unique<AbilityMeleeAttack>(this));
+		this->m_abilities.push_back(std::make_unique<AbilityProjectileAttack>(this));
 
 		// bars
-		this->m_hp_bar = std::make_unique<ProgressBar>(am, size * 0.75f, 12.0f, this->m_stats.hp_current, this->m_stats.hp_max);
+		this->m_hp_bar = std::make_unique<UiProgressBar>(
+			0.0f,
+			0.0f,
+			size * 0.75f,
+			12.0f,
+			this->m_stats.hp_current,
+			this->m_stats.hp_max
+		);
 		this->m_hp_bar->setPosition(
 			this->getWorldPositionX() + (this->m_size - this->m_hp_bar->getWidth()) / 2,
 			this->getWorldPositionY()
@@ -84,6 +92,9 @@ namespace arena {
 			this->m_hp_bar->draw(rt);
 		}
 		rt->draw(this->m_sprite);
+		for (auto& action : this->m_actions) {
+			action->draw(rt);
+		}
 	}
 
 	unsigned long Actor::getId() {
@@ -126,20 +137,38 @@ namespace arena {
 		return this->m_sprite.getPosition();
 	}
 
-	std::unique_ptr<Action> Actor::ai(Tilemap* tilemap, ActorManager* am) {
+	sf::Vector2f Actor::getWorldPositionCenter() {
+		sf::Vector2f position = this->m_sprite.getPosition();
+		position.x += this->m_size / 2.0f;
+		position.y += this->m_size / 2.0f;
+		return position;
+	}
+
+	std::unique_ptr<Action> Actor::ai(AssetManager* asset_manager, Tilemap* tilemap, ActorManager* actor_manager) {
 		// gather all possible abilities
 		std::vector<AbilityTargetSet> ats;
 
 		// check all abilities
 		for (auto& ability : this->m_abilities) {
-			ability->findTargets(ats, am, tilemap);
+			ability->findTargets(ats, actor_manager, tilemap);
 		}
 
 		// if we got abilities then choose one of them
 		if (ats.empty() == false) {
-			this->m_stats.initiative -= 1000;
+			// chose an ability to execute
 			AbilityTargetSet a = ats[misc::getRandomIntInRange(0, ats.size() - 1)];
-			return a.ability->generateAction(a.target);
+
+			// decrement initiative
+			this->m_stats.initiative -= 1000;
+
+			// decrement all cooldowns
+			this->decrementAllAbilityCooldowns();
+
+			// now put this one on cooldown
+			a.ability->putOnCooldown();
+
+			// now create the actions to run this ability
+			return a.ability->generateAction(asset_manager, a.target);
 		}
 
 		// got here so lets just move
@@ -148,9 +177,16 @@ namespace arena {
 		int new_x = this->m_tile_x + vec.x;
 		int new_y = this->m_tile_y + vec.y;
 		if (tilemap->isTilePositionBlocked(new_x, new_y) == false) {
-			// doing an action
+			// we are moving clear initiative
 			this->m_stats.initiative -= 1000;
+
+			// move to new position
 			this->setTilePosition(new_x, new_y, false);
+
+			// decrement all cooldowns
+			this->decrementAllAbilityCooldowns();
+
+			// create action to animate the move
 			return std::make_unique<ActionMoveTo>(
 				this,
 				150,
@@ -161,6 +197,11 @@ namespace arena {
 
 		// didnt do an action
 		this->m_stats.initiative -= 500;
+
+		// decrement all cooldowns
+		this->decrementAllAbilityCooldowns();
+
+		// done
 		return nullptr;
 	}
 
@@ -190,7 +231,10 @@ namespace arena {
 	}
 
 	void Actor::onDeath() {
+		// change graphic to tombstone
 		this->m_sprite.setTextureRect(*(this->m_tileset->getRect(20 * 26 + 18)));
+
+		// move to the front of the actor manager
 	}
 
 	void Actor::faceDirection(misc::EDirection dir) {
@@ -214,5 +258,15 @@ namespace arena {
 				);
 			} break;
 		}
+	}
+
+	void Actor::decrementAllAbilityCooldowns() {
+		for (auto& ability : this->m_abilities) {
+			ability->decrementCooldown();
+		}
+	}
+
+	int Actor::getGraphicsId() {
+		return this->m_graphics_id;
 	}
 }

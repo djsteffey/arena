@@ -12,7 +12,7 @@ namespace arena {
 	class Action;
 	class Tileset;
 	class Ability;
-	class ProgressBar;
+	class UiProgressBar;
 	class AssetManager;
 
 	struct ActorStats{
@@ -39,17 +39,21 @@ namespace arena {
 		float getWorldPositionX();
 		float getWorldPositionY();
 		sf::Vector2f getWorldPosition();
+		sf::Vector2f getWorldPositionCenter();
 		ActorStats* getStats();
 		bool getIsAlive();
-		std::unique_ptr<Action> ai(Tilemap* tilemap, ActorManager* am);
+		std::unique_ptr<Action> ai(AssetManager* asset_manager, Tilemap* tilemap, ActorManager* actor_manager);
 		void onDamage(int amount);
 		void onHeal(int amount);
 		void faceDirection(misc::EDirection dir);
+		int getGraphicsId();
+
 
 	protected:
 
 	private:
 		void onDeath();
+		void decrementAllAbilityCooldowns();
 
 		unsigned long m_id;
 		int m_graphics_id;
@@ -61,7 +65,7 @@ namespace arena {
 		ActorStats m_stats;
 		std::vector<std::unique_ptr<Action>> m_actions;
 		std::vector<std::unique_ptr<Ability>> m_abilities;
-		std::unique_ptr<ProgressBar> m_hp_bar;
+		std::unique_ptr<UiProgressBar> m_hp_bar;
 
 	};
 }

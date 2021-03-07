@@ -3,6 +3,9 @@
 #include "Actor.hpp"
 #include "misc.hpp"
 #include "Action.hpp"
+#include "AssetManager.hpp"
+#include "Effect.hpp"
+#include "Tilemap.hpp"
 
 namespace arena {
 	Ability::Ability(Actor* owner, std::string name, int cooldown, int range, bool require_los) {
@@ -57,7 +60,10 @@ namespace arena {
 					this->m_owner->getTilePositionY(),
 					other->getTilePositionX(),
 					other->getTilePositionY(),
-					[](int x, int y) {
+					[tilemap](int x, int y) {
+						if (tilemap->isTilePositionBlocked(x, y)) {
+							return false;
+						}
 						return true;
 					}
 				);
@@ -78,6 +84,17 @@ namespace arena {
 		return this->m_owner;
 	}
 
+	void Ability::putOnCooldown() {
+		this->m_cooldown_current = this->m_cooldown;
+	}
+
+	void Ability::decrementCooldown() {
+		this->m_cooldown_current -= 1;
+		if (this->m_cooldown_current < 0) {
+			this->m_cooldown_current = 0;
+		}
+	}
+
 	//////////////////////////////////////////////////////////////////////////////
 
 	AbilityMeleeAttack::AbilityMeleeAttack(Actor* owner) : Ability(owner, "Attack", 0, 1, true) {
@@ -88,7 +105,7 @@ namespace arena {
 
 	}
 
-	std::unique_ptr<Action> AbilityMeleeAttack::generateAction(Actor* target) {
+	std::unique_ptr<Action> AbilityMeleeAttack::generateAction(AssetManager* am, Actor* target) {
 		// create the action
 		std::unique_ptr<Action> as = std::make_unique<ActionMeleeAttack>(
 			this->getOwner(),
@@ -101,6 +118,44 @@ namespace arena {
 	}
 
 	bool AbilityMeleeAttack::isValidTargetActor(Actor* target) {
+		// actor must be alive
+		if (target->getIsAlive() == false) {
+			return false;
+		}
+
+		// cant be owner
+		if (target == this->getOwner()) {
+			return false;
+		}
+
+		// passed all the checks
+		return true;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	AbilityProjectileAttack::AbilityProjectileAttack(Actor* owner) : Ability(owner, "Projectile", 1, 5, true) {
+
+	}
+
+	AbilityProjectileAttack::~AbilityProjectileAttack() {
+
+	}
+
+	std::unique_ptr<Action> AbilityProjectileAttack::generateAction(AssetManager* am, Actor* target) {
+		// create the action
+		std::unique_ptr<Action> as = std::make_unique<ActionProjectileAttack>(
+			am,
+			this->getOwner(),
+			target,
+			250
+		);
+
+		// done
+		return as;
+	} 
+
+	bool AbilityProjectileAttack::isValidTargetActor(Actor* target) {
 		// actor must be alive
 		if (target->getIsAlive() == false) {
 			return false;

@@ -45,7 +45,13 @@
     <ClCompile Include="..\src\Ability.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ProgressBar.cpp">
+    <ClCompile Include="..\src\UiWidget.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UiManager.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Effect.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +89,13 @@
     <ClInclude Include="..\src\Ability.hpp">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ProgressBar.hpp">
+    <ClInclude Include="..\src\UiWidget.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UiManager.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Effect.hpp">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,12 +4,15 @@
 #include "ActorManager.hpp"
 #include "misc.hpp"
 #include "Actor.hpp"
+#include "UiManager.hpp"
+#include "UiWidget.hpp"
 
 namespace arena {
 	ScreenBattle::ScreenBattle() {
 		this->m_asset_manager = nullptr;
 		this->m_tilemap = nullptr;
 		this->m_actor_manager = nullptr;
+		this->m_ui_manager = nullptr;
 	}
 
 	ScreenBattle::~ScreenBattle() {
@@ -42,7 +45,7 @@ namespace arena {
 
 		// tilemap
 		this->m_tilemap = std::make_unique<Tilemap>();
-		if (this->m_tilemap->init(this->m_asset_manager.get(), 10, 12, 48) == false) {
+		if (this->m_tilemap->init(this->m_asset_manager.get(), 10, 13, 48) == false) {
 			misc::log("ScreenBattle::init()", "error init tilemap");
 			return false;
 		}
@@ -53,7 +56,7 @@ namespace arena {
 			misc::log("ScreenBattle::init()", "error init actor manager");
 			return false;
 		}
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			std::unique_ptr<Actor> actor = std::make_unique<Actor>();
 			if (actor->init(this->m_asset_manager.get(), 44, 48, this->m_actor_manager->getTileset()) == false) {
 				misc::log("ScreenBattle::init()", "error creating Actor");
@@ -67,9 +70,38 @@ namespace arena {
 			this->m_actor_manager->addActor(std::move(actor));
 		}
 
+		// ui
+		this->m_ui_manager = std::make_unique<UiManager>();
+		for (int i = 0; i < 3; ++i) {
+			if (i < this->m_actor_manager->getActorCount()) {
+				std::unique_ptr<UiWidget> widget = std::make_unique<UiBattleActorStatus>(
+					this->m_asset_manager.get(),
+					0.0f,
+					0.0f,
+					this->m_actor_manager->getActorAtIndex(i)
+				);
+				widget->setPosition(4.0f, 4.0f + (widget->getHeight() + 4.0f) * i);
+				this->m_ui_manager->add(std::move(widget));
+			}
+		}
+		for (int i = 0; i < 3; ++i) {
+			if (i + 3 < this->m_actor_manager->getActorCount()) {
+				std::unique_ptr<UiWidget> widget = std::make_unique<UiBattleActorStatus>(
+					this->m_asset_manager.get(),
+					0.0f,
+					0.0f,
+					this->m_actor_manager->getActorAtIndex(i + 3)
+				);
+				widget->setPosition(rw->getSize().x - 4.0f - widget->getWidth(), 4.0f + (widget->getHeight() + 4.0f) * i);
+				this->m_ui_manager->add(std::move(widget));
+			}
+		}
+
 		// view
 		this->m_view = rw->getDefaultView();
 		this->m_view.setCenter(this->m_tilemap->getWidthInWorld() * 0.50f, this->m_tilemap->getHeightInWorld() * 0.50f);
+		this->m_ui_view = rw->getDefaultView();
+
 
 		// done
 		return true;
@@ -78,11 +110,15 @@ namespace arena {
 	void ScreenBattle::update(int ms){
 		this->m_tilemap->update(ms);
 		this->m_actor_manager->update(ms, this->m_tilemap.get());
+		this->m_ui_manager->update(ms);
 	}
 
 	void ScreenBattle::draw(sf::RenderWindow* rw) {
 		rw->setView(this->m_view);
 		this->m_tilemap->draw(rw);
 		this->m_actor_manager->draw(rw);
+
+		rw->setView(this->m_ui_view);
+		this->m_ui_manager->draw(rw);
 	}
 }

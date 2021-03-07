@@ -12,6 +12,7 @@ namespace arena {
 	class Tilemap;
 	class ActionSequence;
 	class Action;
+	class AssetManager;
 
 	struct AbilityTargetSet {
 		Actor* target;
@@ -27,8 +28,10 @@ namespace arena {
 		Ability(Actor* owner, std::string name, int cooldown, int range, bool require_los);
 		virtual ~Ability();
 		virtual void findTargets(std::vector<AbilityTargetSet>& ats, ActorManager* actor_manager, Tilemap* tilemap);
-		virtual std::unique_ptr<Action> generateAction(Actor* target) = 0;
+		virtual std::unique_ptr<Action> generateAction(AssetManager* am, Actor* target) = 0;
 		Actor* getOwner();
+		void putOnCooldown();
+		void decrementCooldown();
 
 	protected:
 		virtual bool isValidTargetActor(Actor* target) = 0;
@@ -46,7 +49,19 @@ namespace arena {
 	public:
 		AbilityMeleeAttack(Actor* owner);
 		~AbilityMeleeAttack();
-		std::unique_ptr<Action> generateAction(Actor* target) override;
+		std::unique_ptr<Action> generateAction(AssetManager* am, Actor* target) override;
+
+	protected:
+		bool isValidTargetActor(Actor* target) override;
+
+	private:
+	};
+
+	class AbilityProjectileAttack : public Ability {
+	public:
+		AbilityProjectileAttack(Actor* owner);
+		~AbilityProjectileAttack();
+		std::unique_ptr<Action> generateAction(AssetManager* am, Actor* target) override;
 
 	protected:
 		bool isValidTargetActor(Actor* target) override;

@@ -20,7 +20,7 @@ namespace arena {
 			"Arena",
 			sf::Style::Close | sf::Style::Titlebar
 		);
-		this->m_render_window.setPosition(sf::Vector2i(2200, 200));
+		this->m_render_window.setPosition(sf::Vector2i(200, 200));
 
 		// init
 		this->m_screen = std::make_unique<ScreenBattle>();
